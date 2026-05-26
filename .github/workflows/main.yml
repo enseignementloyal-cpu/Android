@@ -27,6 +27,69 @@ jobs:
         with:
           gradle-version: '8.1'
 
+      - name: Fix Gradle build files
+        run: |
+          cat > build.gradle << 'ENDOFFILE'
+          buildscript {
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+              dependencies {
+                  classpath 'com.android.tools.build:gradle:8.1.0'
+              }
+          }
+          allprojects {
+              repositories {
+                  google()
+                  mavenCentral()
+                  maven { url 'https://jitpack.io' }
+              }
+          }
+          ENDOFFILE
+
+          cat > settings.gradle << 'ENDOFFILE'
+          rootProject.name = "LotatoPro"
+          include ':app'
+          ENDOFFILE
+
+          cat > app/build.gradle << 'ENDOFFILE'
+          apply plugin: 'com.android.application'
+
+          android {
+              namespace 'com.lotato.pro'
+              compileSdk 34
+              defaultConfig {
+                  applicationId "com.lotato.pro"
+                  minSdk 21
+                  targetSdk 34
+                  versionCode 1
+                  versionName "6.0"
+              }
+              buildTypes {
+                  release {
+                      minifyEnabled false
+                      signingConfig signingConfigs.debug
+                  }
+              }
+              compileOptions {
+                  sourceCompatibility JavaVersion.VERSION_1_8
+                  targetCompatibility JavaVersion.VERSION_1_8
+              }
+          }
+
+          dependencies {
+              implementation 'androidx.appcompat:appcompat:1.6.1'
+              implementation 'com.google.android.material:material:1.11.0'
+              implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
+              implementation 'androidx.recyclerview:recyclerview:1.3.2'
+              implementation 'androidx.cardview:cardview:1.0.0'
+              implementation 'com.squareup.okhttp3:okhttp:4.12.0'
+              implementation 'com.google.code.gson:gson:2.10.1'
+              implementation 'com.github.sunmi:printersdk:1.0.14'
+          }
+          ENDOFFILE
+
       - name: Build Debug APK
         run: gradle assembleDebug
 
